@@ -7,12 +7,17 @@ st.set_page_config(page_title="Customer Churn Analytics", layout="wide")
 st.title("Customer Churn Analytics Dashboard")
 st.write("Customer Engagement & Product Utilization Analytics for Retention Strategy")
 
-# Load data
-df = pd.read_excel("Customer Engagement & Product Utilization Analytics for Retention Strategy.xlsx")
+# Load dataset
+df = pd.read_excel("Dataset/Customer Engagement & Product Utilization Analytics for Retention Strategy.xlsx")
 
-# Basic rename if needed
-if "Exited" in df.columns:
-    df["Churn Status"] = df["Exited"].map({1: "Churned", 0: "Retained"})
+# Fix column names
+df.columns = df.columns.str.strip()
+
+# KPI calculations
+total_customers = df["CustomerId"].count()
+churned_customers = df["exited"].sum()
+retained_customers = total_customers - churned_customers
+churn_rate = (churned_customers / total_customers) * 100
 
 # Sidebar filters
 st.sidebar.header("Filters")
@@ -34,9 +39,9 @@ filtered_df = df[
     (df["Gender"].isin(gender))
 ]
 
-# KPIs
+# KPI after filter
 total_customers = filtered_df["CustomerId"].count()
-churned_customers = filtered_df["Exited"].sum()
+churned_customers = filtered_df["exited"].sum()
 retained_customers = total_customers - churned_customers
 churn_rate = (churned_customers / total_customers) * 100 if total_customers > 0 else 0
 
@@ -84,10 +89,10 @@ col7, col8 = st.columns(2)
 
 with col7:
     st.subheader("Churn by Number of Products")
-    product_chart = filtered_df.groupby(["NumOfProducts", "Churn Status"]).size().reset_index(name="Count")
+    product_chart = filtered_df.groupby(["Number of products", "Churn Status"]).size().reset_index(name="Count")
     fig3 = px.bar(
         product_chart,
-        x="NumOfProducts",
+        x="Number of products",
         y="Count",
         color="Churn Status",
         barmode="group",
@@ -98,11 +103,10 @@ with col7:
 
 with col8:
     st.subheader("Churn by Active Member")
-    active_chart = filtered_df.groupby(["IsActiveMember", "Churn Status"]).size().reset_index(name="Count")
-    active_chart["IsActiveMember"] = active_chart["IsActiveMember"].map({1: "Active", 0: "Inactive"})
+    active_chart = filtered_df.groupby(["member status", "Churn Status"]).size().reset_index(name="Count")
     fig4 = px.bar(
         active_chart,
-        x="IsActiveMember",
+        x="member status",
         y="Count",
         color="Churn Status",
         barmode="group",
@@ -111,15 +115,35 @@ with col8:
     )
     st.plotly_chart(fig4, use_container_width=True)
 
-st.subheader("Churn by Age")
-fig5 = px.histogram(
-    filtered_df,
-    x="Age",
-    color="Churn Status",
-    barmode="group",
-    color_discrete_map={"Churned": "red", "Retained": "green"}
-)
-st.plotly_chart(fig5, use_container_width=True)
+col9, col10 = st.columns(2)
+
+with col9:
+    st.subheader("Churn by Age Group")
+    age_chart = filtered_df.groupby(["age group", "Churn Status"]).size().reset_index(name="Count")
+    fig5 = px.bar(
+        age_chart,
+        x="age group",
+        y="Count",
+        color="Churn Status",
+        barmode="group",
+        text="Count",
+        color_discrete_map={"Churned": "red", "Retained": "green"}
+    )
+    st.plotly_chart(fig5, use_container_width=True)
+
+with col10:
+    st.subheader("Churn by Balance Group")
+    balance_chart = filtered_df.groupby(["balance group", "Churn Status"]).size().reset_index(name="Count")
+    fig6 = px.bar(
+        balance_chart,
+        x="balance group",
+        y="Count",
+        color="Churn Status",
+        barmode="group",
+        text="Count",
+        color_discrete_map={"Churned": "red", "Retained": "green"}
+    )
+    st.plotly_chart(fig6, use_container_width=True)
 
 st.subheader("Dataset Preview")
 st.dataframe(filtered_df.head(20))
