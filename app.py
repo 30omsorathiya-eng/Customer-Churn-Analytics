@@ -8,7 +8,7 @@ st.title("Customer Churn Analytics Dashboard")
 st.write("Customer Engagement & Product Utilization Analytics for Retention Strategy")
 
 # Load dataset
-df = pd.read_excel("Dataset/Customer Engagement & Product Utilization Analytics for Retention Strategy.xlsx")
+df = pd.read_excel("Customer Engagement & Product Utilization Analytics for Retention Strategy.xlsx")
 
 # Fix column names
 df.columns = df.columns.str.strip()
